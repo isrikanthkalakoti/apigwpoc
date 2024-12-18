@@ -1,0 +1,34 @@
+openapi: 3.0.0
+info:
+  title: Example API
+  description: Example API
+  version: 1.0.0
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      name: x-api-key
+      in: header
+      required: true
+paths:
+  /users:
+    get:
+      summary: Returns a simple response
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+      x-amazon-apigateway-integration:
+        type: http_proxy
+        uri: https://ip-ranges.amazonaws.com/ip-ranges.json
+        passthroughBehavior: when_no_match
+        httpMethod: GET
+      security:
+        - ApiKeyAuth: []
+        
