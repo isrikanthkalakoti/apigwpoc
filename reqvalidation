@@ -1,0 +1,219 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "ReqValidators Sample",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "/{basePath}",
+      "variables": {
+        "basePath": {
+          "default": "/v1"
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/validation": {
+      "get": {
+        "parameters": [
+          {
+            "name": "q1",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "headers": {
+              "test-method-response-header": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArrayOfError"
+                }
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-request-validator": "params-only",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "httpMethod": "GET",
+          "uri": "http://petstore-demo-endpoint.execute-api.com/petstore/pets",
+          "responses": {
+            "default": {
+              "statusCode": "400",
+              "responseParameters": {
+                "method.response.header.test-method-response-header": "'static value'"
+              },
+              "responseTemplates": {
+                "application/xml": "xml 400 response template",
+                "application/json": "json 400 response template"
+              }
+            },
+            "2\\d{2}": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.querystring.type": "method.request.querystring.q1"
+          },
+          "passthroughBehavior": "when_no_match",
+          "type": "http"
+        }
+      },
+      "post": {
+        "parameters": [
+          {
+            "name": "h1",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestBodyModel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "headers": {
+              "test-method-response-header": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArrayOfError"
+                }
+              }
+            }
+          }
+        },
+        "x-amazon-apigateway-request-validator": "all",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "x-amazon-apigateway-integration": {
+          "httpMethod": "POST",
+          "uri": "http://petstore-demo-endpoint.execute-api.com/petstore/pets",
+          "responses": {
+            "default": {
+              "statusCode": "400",
+              "responseParameters": {
+                "method.response.header.test-method-response-header": "'static value'"
+              },
+              "responseTemplates": {
+                "application/xml": "xml 400 response template",
+                "application/json": "json 400 response template"
+              }
+            },
+            "2\\d{2}": {
+              "statusCode": "200"
+            }
+          },
+          "requestParameters": {
+            "integration.request.header.custom_h1": "method.request.header.h1"
+          },
+          "passthroughBehavior": "when_no_match",
+          "type": "http"
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "name": "x-api-key",
+        "in": "header",
+        "required": true
+      }
+    },
+    "schemas": {
+      "RequestBodyModel": {
+        "required": [
+          "name",
+          "price",
+          "type",
+          "date"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "dog",
+              "cat",
+              "fish"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "price": {
+            "maximum": 500.0,
+            "minimum": 25.0,
+            "type": "number"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}Z"
+          }
+        }
+      },
+      "ArrayOfError": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Error"
+        }
+      },
+      "Error": {
+        "type": "object"
+      }
+    }
+  },
+  "x-amazon-apigateway-request-validators": {
+    "all": {
+      "validateRequestParameters": true,
+      "validateRequestBody": true
+    },
+    "params-only": {
+      "validateRequestParameters": true,
+      "validateRequestBody": false
+    }
+  }
+}
